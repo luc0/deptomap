@@ -19,8 +19,8 @@ gulp.task('watch', function() {
 gulp.task('develop', function () {
   livereload.listen();
   nodemon({
-    script: 'app.js',
-    ext: 'js coffee nunjucks',
+    script: 'bin/www',
+    ext: 'js nunjucks coffee',
     stdout: false
   }).on('readable', function () {
     this.stdout.on('data', function (chunk) {

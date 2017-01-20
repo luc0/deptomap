@@ -1,0 +1,11 @@
+{% extends 'layout.nunjucks' %}
+
+{% block content %}
+  <h1>Departamentos</h1>
+  {% for flat in flats %}
+    <ul>
+      <li>Address: {{ flat.address }}</li>
+      <li>Price: <b>${{ flat.price }}</b></li>
+    </ul>
+  {% endfor %}
+{% endblock %}

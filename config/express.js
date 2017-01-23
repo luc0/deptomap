@@ -32,8 +32,9 @@ module.exports = function(app, config) {
   app.use(express.static(config.root + '/public'));
   app.use(methodOverride());
 
-  var controllers = glob.sync(config.root + '/app/controllers/*.js');
+  var controllers = glob.sync(config.root + '/lib/controllers/*.js');
   controllers.forEach(function (controller) {
+    console.log('>> controller',controller);
     require(controller)(app);
   });
 

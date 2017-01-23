@@ -10,11 +10,6 @@
     "test:unit": "mocha --recursive test/middleware test/models test/routes",
     "test:integration": "mocha --recursive test/integration"
   },
-  "babel": {
-    "presets": [
-      "latest"
-    ]
-  },
   "dependencies": {
     "body-parser": "^1.13.3",
     "compression": "^1.5.2",

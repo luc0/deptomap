@@ -8,15 +8,9 @@ var bodyParser = require('body-parser');
 var compress = require('compression');
 var methodOverride = require('method-override');
 var nunjucks = require('nunjucks');
-
-var controllers = glob.sync(config.root + '/app/controllers/*.js');
-controllers.forEach(function (controller) {
-  //import Cat from '/lib/controller/' + controller;
-  require(controller)(app);
-});
+var config = require('../config/config');
 
 module.exports = function(app, config) {
-  console.log('config',config);
   var env = process.env.NODE_ENV || 'development';
   app.locals.ENV = env;
   app.locals.ENV_DEVELOPMENT = env == 'development';
@@ -26,6 +20,13 @@ module.exports = function(app, config) {
   nunjucks.configure(config.root + '/app/views', {
       autoescape: true,
       express: app
+  });
+
+  var controllers = glob.sync(config.root + '/app/controllers/*.js');
+  controllers.forEach(function (controller) {
+    //import Cat from '/lib/controller/' + controller;
+    console.log('controller',controller);
+    require(controller)(app);
   });
 
   // app.use(favicon(config.root + '/public/img/favicon.ico'));

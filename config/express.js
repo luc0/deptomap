@@ -9,7 +9,14 @@ var compress = require('compression');
 var methodOverride = require('method-override');
 var nunjucks = require('nunjucks');
 
+var controllers = glob.sync(config.root + '/app/controllers/*.js');
+controllers.forEach(function (controller) {
+  //import Cat from '/lib/controller/' + controller;
+  require(controller)(app);
+});
+
 module.exports = function(app, config) {
+  console.log('config',config);
   var env = process.env.NODE_ENV || 'development';
   app.locals.ENV = env;
   app.locals.ENV_DEVELOPMENT = env == 'development';
@@ -31,12 +38,6 @@ module.exports = function(app, config) {
   app.use(compress());
   app.use(express.static(config.root + '/public'));
   app.use(methodOverride());
-
-  var controllers = glob.sync(config.root + '/lib/controllers/*.js');
-  controllers.forEach(function (controller) {
-    console.log('>> controller',controller);
-    require(controller)(app);
-  });
 
   app.use(function (req, res, next) {
     var err = new Error('Not Found');

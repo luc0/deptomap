@@ -1,6 +1,6 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
-export default class {
+class Model {
 
   constructor( model ) {
 
@@ -17,3 +17,5 @@ export default class {
   }
 
 }
+
+module.exports = Model;

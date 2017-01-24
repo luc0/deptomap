@@ -4,6 +4,7 @@ var path = require('path'),
 
 var config = {
   development: {
+    host: process.env.HOST || 'localhost',
     root: rootPath,
     app: {
       name: 'deptomap'

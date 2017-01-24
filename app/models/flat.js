@@ -1,30 +1,38 @@
-import mongoose from 'mongoose';
-import baseModel from './baseModel';
+const mongoose = require('mongoose');
+//const baseModel = require('./baseModel');
 
-export default class Model extends baseModel{
-
-  constructor() {
-
-	let model = {
-		name: 'Flat',
-		schema: {	
-			address: String,
-			price: Number
-		}
+let model = {
+	name: 'Flat',
+	schema: {	
+		address: String,
+		price: Number,
+		lat: Number,
+		lng: Number
 	}
+}
 
-  	super( model );
+let Schema = mongoose.Schema;
+let FlatSchema = new Schema(model.schema);
 
-	let Flat = mongoose.model('Flat');
+FlatSchema.virtual('date')
+  .get(function(){
+    return this._id.getTimestamp();
+  });
 
-	return Flat;
+mongoose.model( model.name, FlatSchema);
 
-  }
+class Model {
 
-  sayHello() {
+  constructor( address, price, lat, lng ) {
 
-    return "Hello ";
+  	this.address = address;
+  	this.price = price;
+  	this.lat = lat;
+  	this.lng = lng;
 
   }
 
 }
+
+
+//module.exports = Model;

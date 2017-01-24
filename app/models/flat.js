@@ -5,7 +5,7 @@ export default class Model extends baseModel{
 
   constructor() {
 
-	var model = {
+	let model = {
 		name: 'Flat',
 		schema: {	
 			address: String,
@@ -15,7 +15,7 @@ export default class Model extends baseModel{
 
   	super( model );
 
-	var Flat = mongoose.model('Flat');
+	let Flat = mongoose.model('Flat');
 
 	return Flat;
 

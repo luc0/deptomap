@@ -4,8 +4,8 @@ export default class {
 
   constructor( model ) {
 
-	var Schema = mongoose.Schema;
-	var FlatSchema = new Schema(model.schema);
+	let Schema = mongoose.Schema;
+	let FlatSchema = new Schema(model.schema);
 
 	FlatSchema.virtual('date')
 	  .get(function(){

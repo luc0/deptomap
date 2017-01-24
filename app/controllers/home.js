@@ -14,7 +14,6 @@ router.get('/', (req, res, next) => {
   Flat.find((err, flats) => {
     if (err) return next(err);
 
-    //return res.json({ flats: flats.join(',') });
     console.log('flats',flats.join(','))
     res.render('index', {
       title: 'Generator-Express MVC',
@@ -30,7 +29,6 @@ router.get('/createFlat', (req, res, next) => {
   let address = 'Av. Libertador '+ Math.ceil( Math.random() * 15000 );
   let lat = -34.5942865 + Math.random() / 20 - Math.random() / 20;
   let lng = -58.4301075 + Math.random() / 20 - Math.random() / 20;
-
 
   let flat = new Flat({ price, address, lat, lng });
 

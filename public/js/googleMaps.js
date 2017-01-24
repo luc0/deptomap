@@ -19,7 +19,7 @@ function initMap() {
 	  var marker = new google.maps.Marker({
 	    position: { lat: flat.lat, lng: flat.lng },
 	    map: map,
-	    title: flat.address + ' ( $ '+flat.price + ')';
+	    title: flat.address + ' ( $ ' + flat.price + ' )'
 	  });
 
 	}

@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-//const baseModel = require('./baseModel');
 
 let model = {
 	name: 'Flat',

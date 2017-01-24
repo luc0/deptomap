@@ -1,15 +1,17 @@
-var express = require('express'),
-  router = express.Router(),
-  mongoose = require('mongoose'),
-  Article = mongoose.model('Article'),
-  Flat = mongoose.model('Flat');
+import Flat from '../models/flat';
 
-module.exports = function (app) {
+var express = require('express'),
+  router = express.Router();
+
+module.exports = app => {
   app.use('/', router);
 };
 
-router.get('/', function (req, res, next) {
-  Flat.find(function (err, flats) {
+router.get('/', (req, res, next) => {
+
+  var flat = new Flat();
+
+  flat.find((err, flats) => {
     if (err) return next(err);
     res.render('index', {
       title: 'Generator-Express MVC',
@@ -18,10 +20,13 @@ router.get('/', function (req, res, next) {
   });
 });
 
-router.get('/createFlat', function (req, res, next) {
+router.get('/createFlat', (req, res, next) => {
   var flat = new Flat( { price: 3500 + Math.ceil( Math.random() * 70 ) * 100, address: 'Av. Libertador '+ Math.ceil( Math.random() * 15000 ) } );
-  flat.save(function(err){
+  flat.save( err => {
     if( err ) return res.render( 'index', { title: err } );
     res.render('index',{ title: 'Ok'});
   });
 });
+
+
+//module.exports = Controller;

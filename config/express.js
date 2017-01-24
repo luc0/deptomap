@@ -10,7 +10,7 @@ var methodOverride = require('method-override');
 var nunjucks = require('nunjucks');
 var config = require('../config/config');
 
-module.exports = function(app, config) {
+module.exports = (app, config) => {
   var env = process.env.NODE_ENV || 'development';
   app.locals.ENV = env;
   app.locals.ENV_DEVELOPMENT = env == 'development';
@@ -23,9 +23,7 @@ module.exports = function(app, config) {
   });
 
   var controllers = glob.sync(config.root + '/app/controllers/*.js');
-  controllers.forEach(function (controller) {
-    //import Cat from '/lib/controller/' + controller;
-    console.log('controller',controller);
+  controllers.forEach( (controller) => {
     require(controller)(app);
   });
 
@@ -40,14 +38,14 @@ module.exports = function(app, config) {
   app.use(express.static(config.root + '/public'));
   app.use(methodOverride());
 
-  app.use(function (req, res, next) {
+  app.use( (req, res, next) => {
     var err = new Error('Not Found');
     err.status = 404;
     next(err);
   });
   
   if(app.get('env') === 'development'){
-    app.use(function (err, req, res, next) {
+    app.use( (err, req, res, next) => {
       res.status(err.status || 500);
       res.render('error', {
         message: err.message,
@@ -57,7 +55,7 @@ module.exports = function(app, config) {
     });
   }
 
-  app.use(function (err, req, res, next) {
+  app.use( (err, req, res, next) => {
     res.status(err.status || 500);
       res.render('error', {
         message: err.message,

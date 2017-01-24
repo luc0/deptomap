@@ -1,15 +1,30 @@
 import mongoose from 'mongoose';
-//var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
+import baseModel from './baseModel';
 
-var FlatSchema = new Schema({
-  address: String,
-  price: Number
-});
+export default class Model extends baseModel{
 
-FlatSchema.virtual('date')
-  .get(function(){
-    return this._id.getTimestamp();
-  });
+  constructor() {
 
-mongoose.model('Flat', FlatSchema);
+	var model = {
+		name: 'Flat',
+		schema: {	
+			address: String,
+			price: Number
+		}
+	}
+
+  	super( model );
+
+	var Flat = mongoose.model('Flat');
+
+	return Flat;
+
+  }
+
+  sayHello() {
+
+    return "Hello ";
+
+  }
+
+}

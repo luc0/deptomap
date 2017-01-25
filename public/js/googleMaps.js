@@ -1,6 +1,5 @@
 var map;
 
-FLATS = parseJSON( FLATS );
 
 function initMap() {
 
@@ -12,19 +11,25 @@ function initMap() {
 	zoom: 12
   });
 
-  FLATS.forEach( function( flat ){
+  if( FLATS ){
+	  
+		FLATS = parseJSON( FLATS );
+		
+	  FLATS.forEach( function( flat ){
 
-  	if( flat && flat.address && flat.price && flat.lat && flat.lng ){
+	  	if( flat && flat.address && flat.price && flat.lat && flat.lng ){
 
-	  var marker = new google.maps.Marker({
-	    position: { lat: flat.lat, lng: flat.lng },
-	    map: map,
-	    title: flat.address + ' ( $ ' + flat.price + ' )'
+			  var marker = new google.maps.Marker({
+			    position: { lat: flat.lat, lng: flat.lng },
+			    map: map,
+			    title: flat.address + ' ( $ ' + flat.price + ' )'
+			  });
+
+			}
+
 	  });
 
 	}
-
-  });
 
 }
 

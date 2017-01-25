@@ -16,7 +16,7 @@
   <script type="text/javascript" src="js/googleMaps.js"></script>
 
   <script async defer
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyArDyFoJj9j04gOY0DhQ77bCaU-JxKhTtA&callback=initMap">
+    src="https://maps.googleapis.com/maps/api/js?key={{ googleApiKey }}&callback=initMap">
   </script>
 
 {% endblock %}

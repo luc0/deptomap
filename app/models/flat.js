@@ -4,7 +4,7 @@ let model = {
 	name: 'Flat',
 	schema: {	
 		address: String,
-		price: Number,
+		price: String,
 		lat: Number,
 		lng: Number
 	}

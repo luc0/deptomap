@@ -46,7 +46,7 @@ var createFlat = (req, res, next, flatScapped) => {
 
   let flat = new Flat({ price, address, lat, lng });
 
-  flat.save( err => {
+  Flat.update( { price, address, lat, lng }, { $setOnInsert: flat }, { upsert: true }, err => {
     if( err ) console.log('err',err);
     console.log('> New flat:', address, map);
   });
@@ -57,7 +57,7 @@ var createFlat = (req, res, next, flatScapped) => {
 //-----------------------
 // Not used...
 //-----------------------
-var geocode = () => {
+var geocode = ( flat ) => {
 
   var req = https.get( configMaps.geocodeUrl + flat.address + '&key=' + configMaps.apiKey, function(response) {
 
@@ -75,7 +75,7 @@ var geocode = () => {
         let lng = location.lng;
 
       }else{
-        console.log('> ');
+        console.log('> Error: cant get location..');
       }
 
     };
@@ -122,13 +122,14 @@ router.get('/scrapper', (req, res, next) => {
   
   osmosis
   .get('http://www.zonaprop.com.ar/departamento-alquiler-belgrano.html')
-  .find('.list-posts .post')
+  .find('.list-posts')
   .set({
       'title':     '.post-title > a',
       'price':     '.precio-valor',
   })
   .find('.post-title a')
   .follow('@href')
+  .delay(1000)
   .set({
     'address' : '.list-directions li',
     'map' : '.location .clicvermapa img @src'

@@ -14,21 +14,29 @@ module.exports = app => {
 
 var getLocationFromUrl = ( url ) => {
   
-  let urlArray = url.split('&');
-  let location;
+  if( url ){
 
-  urlArray.forEach( ( chunk ) => {
-  
-    let markers = chunk.indexOf('markers') >= 0;
-  
-    if( markers ){
-      let stringLocation = chunk.replace('markers=','');
-      location = stringLocation.split(',');
-    }
+    let urlArray = url.split('&');
+    let location;
 
-  });
-  
-  return location;
+    urlArray.forEach( ( chunk ) => {
+    
+      let markers = chunk.indexOf('markers') >= 0;
+    
+      if( markers ){
+        let stringLocation = chunk.replace('markers=','');
+        location = stringLocation.split(',');
+      }
+
+    });
+    
+    return location;
+
+  }else{
+    
+    return false;
+
+  }
 
 }
 
@@ -40,16 +48,20 @@ var createFlat = (req, res, next, flatScapped) => {
   let map = getLocationFromUrl( flatScapped.map );
 
   if( map && map.length == 2 ){
+
     var lat = map[0];
     var lng = map[1];
+
+    let flat = new Flat({ price, address, lat, lng });
+
+    Flat.update( { price, address, lat, lng }, { $setOnInsert: flat }, { upsert: true }, err => {
+      if( err ) console.log('err',err);
+      console.log('> New flat:', address, map);
+    });
+
+  }else{
+    console.log('> Error: can not parse location from URL :(', flatScapped);
   }
-
-  let flat = new Flat({ price, address, lat, lng });
-
-  Flat.update( { price, address, lat, lng }, { $setOnInsert: flat }, { upsert: true }, err => {
-    if( err ) console.log('err',err);
-    console.log('> New flat:', address, map);
-  });
 
 }
 
@@ -106,7 +118,6 @@ router.get('/', (req, res, next) => {
   Flat.find((err, flats) => {
     if (err) return next(err);
 
-    console.log('flats',flats.join(','))
     res.render('index', {
       title: 'Mapa',
       flats: JSON.stringify( flats ),
@@ -122,20 +133,27 @@ router.get('/scrapper', (req, res, next) => {
   
   osmosis
   .get('http://www.zonaprop.com.ar/departamento-alquiler-belgrano.html')
+  .follow('.pagination li:not(.pagination-action-prev):not(.pagination-action-next) a @href')
+  .delay(2000)
   .find('.list-posts')
+  .delay(2000)
   .set({
       'title':     '.post-title > a',
       'price':     '.precio-valor',
   })
+  .delay(2000)
   .find('.post-title a')
+  .delay(2000)
   .follow('@href')
-  .delay(1000)
+  .delay(2000)
   .set({
     'address' : '.list-directions li',
     'map' : '.location .clicvermapa img @src'
   })
+  .delay(2000)
   .data(function(listing) {
-    console.log('>listing',listing);
+    //console.log('>listing',listing);
+    console.log('>');
     listing.price = listing.price.replace( /\s/, '');
     createFlat(req, res, next, listing);
   })

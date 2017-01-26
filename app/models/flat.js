@@ -10,7 +10,8 @@ let model = {
     m2: String,
     m2total: String,
     rooms: String,
-		bathrooms: String
+    bathrooms: String,
+		activeDays: String
 	}
 }
 

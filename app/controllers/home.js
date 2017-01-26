@@ -40,15 +40,30 @@ var getLocationFromUrl = ( url ) => {
 
 }
 
+var getNumberFromString = ( string ) => {
+
+  let number = parseFloat(string.match(/-*[0-9]+/));
+  return number;
+
+};
+
+var getTotalPrice = ( arrayPrices ) => {
+
+  console.log( '>>prices', arrayPrices );
+
+}
+
 var createFlat = (req, res, next, flatScapped) => {
 
-  let price = flatScapped.price;
+  let price = getTotalPrice( flatScapped.price );
+  return;
   let address = flatScapped.address;
   let m2 = flatScapped.m2;
   let m2total = flatScapped.m2total;
   let rooms = flatScapped.rooms;
   let bathrooms = flatScapped.bathrooms;
   let realState = flatScapped.realState;
+  let activeDays = getNumberFromString( flatScapped.activeDays );
   
   let map = getLocationFromUrl( flatScapped.map );
 
@@ -57,7 +72,7 @@ var createFlat = (req, res, next, flatScapped) => {
     var lat = map[0];
     var lng = map[1];
 
-    let toSave = { price, address, lat, lng, m2, m2total, rooms, bathrooms, realState };
+    let toSave = { price, address, lat, lng, m2, m2total, rooms, bathrooms, realState, activeDays };
 
     let flat = new Flat( toSave );
 
@@ -146,7 +161,6 @@ router.get('/scrapper', (req, res, next) => {
   .delay(2000)
   .set({
       'title':     '.post-title > a',
-      'price':     '.precio-valor',
       'm2':        '.misc .misc-m2cubiertos',
       'm2total':   '.misc .misc-m2totales',
       'rooms':     '.misc .misc-habitaciones',
@@ -158,14 +172,21 @@ router.get('/scrapper', (req, res, next) => {
   .follow('@href')
   .delay(2000)
   .set({
-    'address' : '.list-directions li',
-    'map' : '.location .clicvermapa img @src',
-    'realState': '.datos-inmobiliaria-title'
+    'prices': [
+      osmosis
+        .set({
+          'price': '.aviso-datos:first-child .valor'
+        })
+    ],
+    'address':    '.list-directions li',
+    'map':        '.location .clicvermapa img @src',
+    'realState':  '.datos-inmobiliaria-title',
+    'activeDays': '.aviso-datos-anunciante ul li:last-child .valor'
   })
   .delay(2000)
   .data(function(listing) {
     console.log('>listing',listing);
-    listing.price = listing.price.replace( /\s/, '');
+    ////listing.price = listing.price.replace( /\s/, '');
     createFlat(req, res, next, listing);
   })
   .log(console.log)

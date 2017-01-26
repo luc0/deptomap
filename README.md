@@ -1,4 +1,5 @@
 # TODO
 
 * Scrap different locations
-* Better format tooltip
+* Scrap images
+* Add filters with vue.js

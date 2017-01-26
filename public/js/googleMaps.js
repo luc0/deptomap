@@ -14,7 +14,7 @@ function initMap() {
   if( FLATS ){
 	  
 		FLATS = parseJSON( FLATS );
-		
+
 	  FLATS.forEach( function( flat ){
 
 	  	if( flat && flat.address && flat.price && flat.lat && flat.lng ){
@@ -22,7 +22,7 @@ function initMap() {
 			  var marker = new google.maps.Marker({
 			    position: { lat: flat.lat, lng: flat.lng },
 			    map: map,
-			    title: flat.address + ' ( $ ' + flat.price + ' )'
+			    title: flat.address + ' ( ' + flat.price + ' )'
 			  });
 
 			}

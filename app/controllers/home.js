@@ -44,6 +44,11 @@ var createFlat = (req, res, next, flatScapped) => {
 
   let price = flatScapped.price;
   let address = flatScapped.address;
+  let m2 = flatScapped.m2;
+  let m2total = flatScapped.m2total;
+  let rooms = flatScapped.rooms;
+  let bathrooms = flatScapped.bathrooms;
+  let realState = flatScapped.realState;
   
   let map = getLocationFromUrl( flatScapped.map );
 
@@ -52,9 +57,11 @@ var createFlat = (req, res, next, flatScapped) => {
     var lat = map[0];
     var lng = map[1];
 
-    let flat = new Flat({ price, address, lat, lng });
+    let toSave = { price, address, lat, lng, m2, m2total, rooms, bathrooms, realState };
 
-    Flat.update( { price, address, lat, lng }, { $setOnInsert: flat }, { upsert: true }, err => {
+    let flat = new Flat( toSave );
+
+    Flat.update( toSave, { $setOnInsert: flat }, { upsert: true }, err => {
       if( err ) console.log('err',err);
       console.log('> New flat:', address, map);
     });
@@ -140,6 +147,10 @@ router.get('/scrapper', (req, res, next) => {
   .set({
       'title':     '.post-title > a',
       'price':     '.precio-valor',
+      'm2':        '.misc .misc-m2cubiertos',
+      'm2total':   '.misc .misc-m2totales',
+      'rooms':     '.misc .misc-habitaciones',
+      'bathrooms': '.misc .misc-banos'
   })
   .delay(2000)
   .find('.post-title a')
@@ -148,12 +159,12 @@ router.get('/scrapper', (req, res, next) => {
   .delay(2000)
   .set({
     'address' : '.list-directions li',
-    'map' : '.location .clicvermapa img @src'
+    'map' : '.location .clicvermapa img @src',
+    'realState': '.datos-inmobiliaria-title'
   })
   .delay(2000)
   .data(function(listing) {
-    //console.log('>listing',listing);
-    console.log('>');
+    console.log('>listing',listing);
     listing.price = listing.price.replace( /\s/, '');
     createFlat(req, res, next, listing);
   })

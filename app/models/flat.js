@@ -6,7 +6,11 @@ let model = {
 		address: String,
 		price: String,
 		lat: Number,
-		lng: Number
+    lng: Number,
+    m2: String,
+    m2total: String,
+    rooms: String,
+		bathrooms: String
 	}
 }
 

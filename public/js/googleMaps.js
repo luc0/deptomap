@@ -17,13 +17,22 @@ function initMap() {
 
 	  FLATS.forEach( function( flat ){
 
-	  	if( flat && flat.address && flat.price && flat.lat && flat.lng ){
+	  	if( flat && flat.address && flat.price && flat.lat && flat.lng && flat.m2 && flat.realState ){
 
 			  var marker = new google.maps.Marker({
 			    position: { lat: flat.lat, lng: flat.lng },
-			    map: map,
-			    title: flat.address + ' ( ' + flat.price + ' )'
+			    map: map
 			  });
+
+			  var infoHTML = '<div><h2>' + flat.address + '</h2><h3>' + flat.price + '</h3><strong>' + flat.realState  + '</strong><ul><li>' + flat.m2 + '</li><li>' + flat.m2total + '</li><li>' + flat.rooms + '</li><li>' + flat.bathrooms + '</li></ul></div>';
+
+			  var infoWindow = new google.maps.InfoWindow({
+		        content: infoHTML
+		    });
+
+		    google.maps.event.addListener(marker, 'click', function () {
+		        infoWindow.open(map, marker);
+		    });
 
 			}
 

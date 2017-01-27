@@ -19,6 +19,8 @@ function initMap() {
 	  
 		FLATS = parseJSON( FLATS );
 
+		var infoWindow;
+		
 	  FLATS.forEach( function( flat ){
 
 	  	if( flat && flat.address && flat.price && flat.lat && flat.lng && flat.m2 && flat.realState ){
@@ -32,14 +34,26 @@ function initMap() {
 			    map: map
 			  });
 
-			  var infoHTML = '<div><h2>' + flat.address + '</h2><h3>$ ' + numberWithCommas(flat.price) + '</h3><strong>' + flat.realState  + '</strong><ul><li>' + flat.m2 + '</li><li>' + flat.m2total + '</li><li>' + flat.rooms + '</li><li>' + flat.bathrooms + '</li><li>' + flat.activeDays + ' días activo</li><ul></div>';
+			  var infoHTML = '<div><h2>' + flat.address + '</h2><h3>$ ' + numberWithCommas(flat.price);
+			  
+			  if( flat.includedExpenses ){
+			  	infoHTML += ' ( incluido expensas )';
+			  }
 
-			  var infoWindow = new google.maps.InfoWindow({
-		        content: infoHTML
-		    });
+			  infoHTML += '</h3><strong>' + flat.realState  + '</strong><ul><li>' + flat.m2 + '</li><li>' + flat.m2total + '</li><li>' + flat.rooms + '</li><li>' + flat.bathrooms + '</li><li>' + flat.activeDays + ' días activo</li><ul></div>';
+	 		  
+	 		  infoWindow = new google.maps.InfoWindow({
+	        content: infoHTML
+	    	});
 
-		    google.maps.event.addListener(marker, 'click', function () {
-		        infoWindow.open(map, marker);
+		    marker.addListener('click', function () {
+
+		    	if (infoWindow) {
+			        infoWindow.close();
+			    }
+
+	    		infoWindow.open(map, marker);
+
 		    });
 
 			}

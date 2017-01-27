@@ -72,21 +72,18 @@ var getTotalPrice = ( arrayPrices ) => {
 
     let currentInDollars = needsConvertion( current.price );
     let price = getNumberFromString( current.price ) || 0;
-    console.log('current is: ',price);
 
     if( currentInDollars ){
       price *= DOLLARS_EXCHANGE;
-      console.log('( to pesos: ',price,' )');
     }
 
-    console.log('current final is: ',price);
     totalPrice += parseInt( price );
   });
 
-  console.log('total is: ',totalPrice);
   let priceObject = {};
   priceObject.total = totalPrice;
   priceObject.expenses = hasExpenses( arrayPrices );
+  console.log('priceObject.expenses',priceObject.expenses);
 
   return priceObject;
 
@@ -94,7 +91,8 @@ var getTotalPrice = ( arrayPrices ) => {
 
 var hasExpenses = ( arrayPrices ) => {
   
-  if( arrayPrices.length == 3 && parseInt( getNumberFromString(arrayPrices[2]) ) > 0 ){
+    console.log('> arrayPrices',arrayPrices);
+  if( arrayPrices.length == 3 && parseInt( getNumberFromString(arrayPrices[2].price) ) > 0 ){
     return true; //arrayPrices[2];
   }
   
@@ -129,7 +127,7 @@ var createFlat = (req, res, next, flatScapped) => {
 
     Flat.update( toSave, { $setOnInsert: flat }, { upsert: true }, err => {
       if( err ) console.log('err',err);
-      console.log('> New flat:', price, address);
+      console.log('> New flat:', price, address, toSave);
     });
 
   }else{
@@ -231,7 +229,8 @@ router.get('/scrapper', (req, res, next) => {
     'address':    '.list-directions li',
     'map':        '.location .clicvermapa img @src',
     'realState':  '.datos-inmobiliaria-title',
-    'activeDays': '.aviso-datos-anunciante ul li:last-child .valor'
+    'activeDays': '.aviso-datos-anunciante ul li:last-child .valor',
+    'url':        ''
   })
   .delay(2000)
   .data(function(listing) {

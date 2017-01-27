@@ -8,6 +8,8 @@ const osmosis = require('osmosis');
 let express = require('express'),
   router = express.Router();
 
+const DOLLARS_EXCHANGE = 16;
+
 module.exports = app => {
   app.use('/', router);
 };
@@ -40,23 +42,72 @@ var getLocationFromUrl = ( url ) => {
 
 }
 
-var getNumberFromString = ( string ) => {
+var getNumberFromString = ( currentString ) => {
 
-  let number = parseFloat(string.match(/-*[0-9]+/));
-  return number;
+  if( typeof currentString === 'string' ){
+    let clearDot = currentString.replace( /\./, '');
+    let number = parseFloat(clearDot.match(/-*[0-9]+/));
+    return number;
+  }
+
+  return;
+
+};
+
+var needsConvertion = ( stringPrice ) => {
+  
+  if( stringPrice.toLowerCase().indexOf('u$s') >= 0 ){
+    return true;
+  }
+  
+  return false;
 
 };
 
 var getTotalPrice = ( arrayPrices ) => {
 
-  console.log( '>>prices', arrayPrices );
+  let totalPrice = 0;
+
+  arrayPrices.forEach( ( current ) => {
+
+    let currentInDollars = needsConvertion( current.price );
+    let price = getNumberFromString( current.price ) || 0;
+    console.log('current is: ',price);
+
+    if( currentInDollars ){
+      price *= DOLLARS_EXCHANGE;
+      console.log('( to pesos: ',price,' )');
+    }
+
+    console.log('current final is: ',price);
+    totalPrice += parseInt( price );
+  });
+
+  console.log('total is: ',totalPrice);
+  let priceObject = {};
+  priceObject.total = totalPrice;
+  priceObject.expenses = hasExpenses( arrayPrices );
+
+  return priceObject;
 
 }
 
+var hasExpenses = ( arrayPrices ) => {
+  
+  if( arrayPrices.length == 3 && parseInt( getNumberFromString(arrayPrices[2]) ) > 0 ){
+    return true; //arrayPrices[2];
+  }
+  
+  return false;
+
+};
+
 var createFlat = (req, res, next, flatScapped) => {
 
-  let price = getTotalPrice( flatScapped.price );
-  return;
+  let priceObject = getTotalPrice( flatScapped.prices );
+
+  let price = priceObject.total;
+  let includedExpenses = priceObject.expenses;
   let address = flatScapped.address;
   let m2 = flatScapped.m2;
   let m2total = flatScapped.m2total;
@@ -72,13 +123,13 @@ var createFlat = (req, res, next, flatScapped) => {
     var lat = map[0];
     var lng = map[1];
 
-    let toSave = { price, address, lat, lng, m2, m2total, rooms, bathrooms, realState, activeDays };
+    let toSave = { price, includedExpenses, address, lat, lng, m2, m2total, rooms, bathrooms, realState, activeDays };
 
     let flat = new Flat( toSave );
 
     Flat.update( toSave, { $setOnInsert: flat }, { upsert: true }, err => {
       if( err ) console.log('err',err);
-      console.log('> New flat:', address, map);
+      console.log('> New flat:', price, address);
     });
 
   }else{
@@ -174,9 +225,8 @@ router.get('/scrapper', (req, res, next) => {
   .set({
     'prices': [
       osmosis
-        .set({
-          'price': '.aviso-datos:first-child .valor'
-        })
+        .find('.aviso-datos:first-child li .valor')
+        .set('price')
     ],
     'address':    '.list-directions li',
     'map':        '.location .clicvermapa img @src',
@@ -185,7 +235,7 @@ router.get('/scrapper', (req, res, next) => {
   })
   .delay(2000)
   .data(function(listing) {
-    console.log('>listing',listing);
+    //console.log('>listing',listing);
     ////listing.price = listing.price.replace( /\s/, '');
     createFlat(req, res, next, listing);
   })

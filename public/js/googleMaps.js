@@ -1,6 +1,10 @@
 var map;
 const MAX_ACTIVE_DAYS = 180;
 
+function numberWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
 function initMap() {
 
   map = new google.maps.Map(document.getElementById('map'), {
@@ -28,7 +32,7 @@ function initMap() {
 			    map: map
 			  });
 
-			  var infoHTML = '<div><h2>' + flat.address + '</h2><h3>' + flat.price + '</h3><strong>' + flat.realState  + '</strong><ul><li>' + flat.m2 + '</li><li>' + flat.m2total + '</li><li>' + flat.rooms + '</li><li>' + flat.bathrooms + '</li><li>' + flat.activeDays + ' días activo</li><ul></div>';
+			  var infoHTML = '<div><h2>' + flat.address + '</h2><h3>$ ' + numberWithCommas(flat.price) + '</h3><strong>' + flat.realState  + '</strong><ul><li>' + flat.m2 + '</li><li>' + flat.m2total + '</li><li>' + flat.rooms + '</li><li>' + flat.bathrooms + '</li><li>' + flat.activeDays + ' días activo</li><ul></div>';
 
 			  var infoWindow = new google.maps.InfoWindow({
 		        content: infoHTML

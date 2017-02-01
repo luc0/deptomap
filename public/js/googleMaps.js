@@ -41,16 +41,16 @@ function initMap() {
 			  }
 
 			  infoHTML += '</h3><strong>' + flat.realState  + '</strong><ul><li>' + flat.m2 + '</li><li>' + flat.m2total + '</li><li>' + flat.rooms + '</li><li>' + flat.bathrooms + '</li><li>' + flat.activeDays + ' días activo</li><ul></div>';
-	 		  
-	 		  infoWindow = new google.maps.InfoWindow({
-	        content: infoHTML
-	    	});
 
 		    marker.addListener('click', function () {
 
 		    	if (infoWindow) {
 			        infoWindow.close();
 			    }
+
+					infoWindow = new google.maps.InfoWindow({
+		        content: infoHTML
+		    	});
 
 	    		infoWindow.open(map, marker);
 

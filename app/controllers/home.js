@@ -184,16 +184,34 @@ var geocode = ( flat ) => {
 // ROUTES
 //-----------------------
 
+// router.get('/', (req, res, next) => {
+
+//   Flat.find((err, flats) => {
+//     if (err) return next(err);
+
+//     res.render('index', {
+//       title: 'Mapa',
+//       flats: JSON.stringify( flats ),
+//       rootPath: config.host,
+//       googleApiKey: configMaps.apiKey
+//     });
+//   });
+// });
+
 router.get('/', (req, res, next) => {
 
   Flat.find((err, flats) => {
     if (err) return next(err);
 
     res.render('index', {
-      title: 'Mapa',
-      flats: JSON.stringify( flats ),
-      rootPath: config.host,
-      googleApiKey: configMaps.apiKey
+      data: {
+        title: 'Mapa',
+        flats: flats,//JSON.stringify( flats ),
+        rootPath: config.host,
+        googleApiKey: configMaps.apiKey
+      },
+      vue: {
+      }
     });
   });
 });

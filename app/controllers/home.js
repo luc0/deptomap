@@ -202,8 +202,11 @@ router.get('/scrapper', (req, res, next) => {
 
   var items = [];
   
+  // http://www.zonaprop.com.ar/inmuebles-alquiler-palermo.html
+  // http://www.zonaprop.com.ar/departamento-alquiler-belgrano.html
+
   osmosis
-  .get('http://www.zonaprop.com.ar/departamento-alquiler-belgrano.html')
+  .get('http://www.zonaprop.com.ar/inmuebles-alquiler-palermo.html')
   .follow('.pagination li:not(.pagination-action-prev):not(.pagination-action-next) a @href')
   .delay(2000)
   .find('.list-posts')

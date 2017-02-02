@@ -1,0 +1,46 @@
+<script src="https://unpkg.com/vue/dist/vue.js"></script>
+
+  <div id="app">
+    <ol>
+      <li v-for="flat in even(flats, filterPrice)">
+        {{ flat.price }}
+      </li>
+    </ol>
+    <input type="text" v-model="filterPrice"/>
+  </div>
+
+  <div id="map"></div>
+
+  <h1>Departamentos</h1>
+
+  <script type="text/javascript">
+
+    var FLATS = '<%= flats %>'
+
+  </script>
+
+  <script type="text/javascript" src="js/googleMaps.js"></script>
+
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=<%= googleApiKey %>&callback=initMap"></script>
+
+
+<script>
+
+var app = new Vue({
+  el: '#app',
+  data () {
+    return {
+      flats:[{price:1000},{price:20000}],
+      filterPrice: 9000
+    }
+  },
+  methods: {
+    even: function (flats, filterPrice) {
+      return flats.filter(function (flat) {
+        return flat.price < filterPrice
+      })
+    }
+  }
+});
+
+</script>

@@ -204,17 +204,10 @@ router.get('/', (req, res, next) => {
     if (err) return next(err);
 
     res.render('index', {
-      data: {
         title: 'Mapa',
-        flats: flats,//JSON.stringify( flats ),
-        filterPrice: '9000',//JSON.stringify( flats ),
+        flats: JSON.stringify( flats ),
         rootPath: config.host,
-        googleApiKey: configMaps.apiKey,
-        center: {lat: 10.0, lng: 10.0},
-        markers: [{ position: {lat: 10.0, lng: 10.0}}, { position: {lat: 11.0, lng: 11.0} }]
-      },
-      vue: {
-      }
+        googleApiKey: configMaps.apiKey
     });
   });
 });

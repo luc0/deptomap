@@ -203,6 +203,7 @@ router.get('/', (req, res, next) => {
   Flat.find((err, flats) => {
     if (err) return next(err);
 
+    
     res.render('index', {
         title: 'Mapa',
         flats: JSON.stringify( flats ),

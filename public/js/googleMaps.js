@@ -15,15 +15,15 @@ function initMap() {
 	zoom: 12
   });
 
-  if( FLATS ){
+  if( FLATS && FLATS.length ){
 	  
-		FLATS = parseJSON( FLATS );
+		//FLATS = parseJSON( FLATS );
 
 		var infoWindow;
 		
 	  FLATS.forEach( function( flat ){
 
-	  	if( flat && flat.address && flat.price && flat.lat && flat.lng && flat.m2 && flat.realState ){
+	  	if( flat /*&& flat.address && flat.price && flat.lat && flat.lng && flat.m2 && flat.realState*/ ){
 	  		
 	  		if( flat.activeDays && parseInt(flat.activeDays) > MAX_ACTIVE_DAYS ){
 	  			return;

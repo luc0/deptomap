@@ -24,7 +24,6 @@ module.exports = (app, config) => {
   // });
   app.set('vue', {
       //ComponentsDir is optional if you are storing your components in a different directory than your views
-      componentsDir: __dirname + '/components',
       //Default layout is optional it's a file and relative to the views path, it does not require a .vue extention.
       //If you want a custom layout set this to the location of your layout.vue file.
       defaultLayout: 'layout'
@@ -57,7 +56,7 @@ module.exports = (app, config) => {
   if(app.get('env') === 'development'){
     app.use( (err, req, res, next) => {
       res.status(err.status || 500);
-      res.render('error', {
+      res.json({
         message: err.message,
         error: err,
         title: 'error'
@@ -67,7 +66,7 @@ module.exports = (app, config) => {
 
   app.use( (err, req, res, next) => {
     res.status(err.status || 500);
-      res.render('error', {
+      res.json({
         message: err.message,
         error: {},
         title: 'error'

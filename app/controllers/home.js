@@ -207,6 +207,7 @@ router.get('/', (req, res, next) => {
       data: {
         title: 'Mapa',
         flats: flats,//JSON.stringify( flats ),
+        jsFlats: JSON.stringify( flats ),
         filterPrice: '9000',//JSON.stringify( flats ),
         rootPath: config.host,
         googleApiKey: configMaps.apiKey,
@@ -214,6 +215,7 @@ router.get('/', (req, res, next) => {
         markers: [{ position: {lat: 10.0, lng: 10.0}}, { position: {lat: 11.0, lng: 11.0} }]
       },
       vue: {
+        vueFlats: JSON.stringify( flats )
       }
     });
   });

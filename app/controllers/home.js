@@ -100,21 +100,21 @@ var hasExpenses = ( arrayPrices ) => {
 
 };
 
-var createFlat = (req, res, next, flatScapped) => {
+var createFlat = (req, res, next, flatScrapped) => {
 
-  let priceObject = getTotalPrice( flatScapped.prices );
+  let priceObject = getTotalPrice( flatScrapped.prices );
 
   let price = priceObject.total;
   let includedExpenses = priceObject.expenses;
-  let address = flatScapped.address;
-  let m2 = flatScapped.m2;
-  let m2total = flatScapped.m2total;
-  let rooms = flatScapped.rooms;
-  let bathrooms = flatScapped.bathrooms;
-  let realState = flatScapped.realState;
-  let activeDays = getNumberFromString( flatScapped.activeDays );
+  let address = flatScrapped.address;
+  let m2 = parseInt(flatScrapped.m2);
+  let m2total = parseInt(flatScrapped.m2total);
+  let rooms = parseInt(flatScrapped.rooms);
+  let bathrooms = parseInt(flatScrapped.bathrooms);
+  let realState = flatScrapped.realState;
+  let activeDays = getNumberFromString( flatScrapped.activeDays );
   
-  let map = getLocationFromUrl( flatScapped.map );
+  let map = getLocationFromUrl( flatScrapped.map );
 
   if( map && map.length == 2 ){
 
@@ -131,7 +131,7 @@ var createFlat = (req, res, next, flatScapped) => {
     });
 
   }else{
-    console.log('> Error: can not parse location from URL :(', flatScapped);
+    console.log('> Error: can not parse location from URL :(', flatScrapped);
   }
 
 }
@@ -207,8 +207,11 @@ router.get('/', (req, res, next) => {
       data: {
         title: 'Mapa',
         flats: flats,//JSON.stringify( flats ),
+        filterPrice: '9000',//JSON.stringify( flats ),
         rootPath: config.host,
-        googleApiKey: configMaps.apiKey
+        googleApiKey: configMaps.apiKey,
+        center: {lat: 10.0, lng: 10.0},
+        markers: [{ position: {lat: 10.0, lng: 10.0}}, { position: {lat: 11.0, lng: 11.0} }]
       },
       vue: {
       }

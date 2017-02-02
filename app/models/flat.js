@@ -4,15 +4,15 @@ let model = {
 	name: 'Flat',
 	schema: {	
 		address: String,
-    price: String,
+    price: Number,
 		includedExpenses: Boolean,
 		lat: Number,
     lng: Number,
-    m2: String,
-    m2total: String,
-    rooms: String,
-    bathrooms: String,
-		activeDays: String
+    m2: Number,
+    m2total: Number,
+    rooms: Number,
+    bathrooms: Number,
+		activeDays: Number
 	}
 }
 

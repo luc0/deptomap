@@ -121,7 +121,9 @@ var createFlat = (req, res, next, flatScrapped) => {
     var lat = map[0];
     var lng = map[1];
 
-    let toSave = { price, includedExpenses, address, lat, lng, m2, m2total, rooms, bathrooms, realState, activeDays };
+    var position = { lat, lng };
+
+    let toSave = { price, includedExpenses, address, position, m2, m2total, rooms, bathrooms, realState, activeDays };
 
     let flat = new Flat( toSave );
 
@@ -203,7 +205,6 @@ router.get('/', (req, res, next) => {
   Flat.find((err, flats) => {
     if (err) return next(err);
 
-    
     res.render('index', {
         title: 'Mapa',
         flats: JSON.stringify( flats ),

@@ -6,8 +6,10 @@ let model = {
 		address: String,
     price: Number,
 		includedExpenses: Boolean,
-		lat: Number,
-    lng: Number,
+    position:{
+		  lat: Number,
+      lng: Number
+    },
     m2: Number,
     m2total: Number,
     rooms: Number,

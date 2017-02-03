@@ -14,7 +14,8 @@ let model = {
     m2total: Number,
     rooms: Number,
     bathrooms: Number,
-		activeDays: Number
+		activeDays: Number,
+    isOpen: Boolean
 	}
 }
 

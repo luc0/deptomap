@@ -13,9 +13,13 @@
         v-for="m in filteredMarkers"
         :position="m.position"
         :clickable="true"
-        :draggable="true"
-        @click="center=m.position"
-      ></google-marker>
+        :draggable="false"
+        @click="openInfoWindow(m)"
+      >
+        <info-window :opened.sync="m.isOpen">
+          test
+        </info-window>
+      </google-marker>
     </google-map>
 </div>
 
@@ -43,6 +47,7 @@
 
   document.addEventListener('DOMContentLoaded', function() {
       Vue.component('google-map', VueGoogleMap.Map);
+      Vue.component('info-window', VueGoogleMap.InfoWindow);
       Vue.component('google-marker', VueGoogleMap.Marker);
       var map = new Vue({
           el: '#mapa',
@@ -52,11 +57,16 @@
             filterPriceMin: 5000,
             filterPriceMax: 9000
           },
+          methods:{
+            openInfoWindow: function( marker ){
+              marker.isOpen = true;
+              console.log('test!')
+            }
+          },
           computed:{
             filteredMarkers: function(){
               var self = this
               return self.markers.filter(function (marker) {
-                console.log('filterPriceMax',self.filterPriceMin)
                 return (marker.price > self.filterPriceMin) && (marker.price < self.filterPriceMax) 
               })
             }
@@ -66,11 +76,11 @@
       var slider = document.getElementById('slider');
 
       noUiSlider.create(slider, {
-        start: [6000, 8000],
+        start: [2000, 50000],
         connect: true,
         range: {
-          'min': 5000,
-          'max': 22000
+          'min': 2000,
+          'max': 50000
         }
       });
 

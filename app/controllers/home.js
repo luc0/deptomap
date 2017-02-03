@@ -186,28 +186,21 @@ var geocode = ( flat ) => {
 // ROUTES
 //-----------------------
 
-// router.get('/', (req, res, next) => {
-
-//   Flat.find((err, flats) => {
-//     if (err) return next(err);
-
-//     res.render('index', {
-//       title: 'Mapa',
-//       flats: JSON.stringify( flats ),
-//       rootPath: config.host,
-//       googleApiKey: configMaps.apiKey
-//     });
-//   });
-// });
-
 router.get('/', (req, res, next) => {
 
   Flat.find((err, flats) => {
     if (err) return next(err);
 
+    // No es muy prolijo
+    var changedFlats = [];
+    flats.forEach( flat => {
+      flat.isOpen = false;
+      changedFlats.push( flat )
+    });
+
     res.render('index', {
         title: 'Mapa',
-        flats: JSON.stringify( flats ),
+        flats: JSON.stringify( changedFlats ),
         rootPath: config.host,
         googleApiKey: configMaps.apiKey
     });
@@ -222,7 +215,7 @@ router.get('/scrapper', (req, res, next) => {
   // http://www.zonaprop.com.ar/departamento-alquiler-belgrano.html
 
   osmosis
-  .get('http://www.zonaprop.com.ar/inmuebles-alquiler-palermo.html')
+  .get('http://www.zonaprop.com.ar/departamento-alquiler-belgrano.html')
   .follow('.pagination li:not(.pagination-action-prev):not(.pagination-action-next) a @href')
   .delay(2000)
   .find('.list-posts')

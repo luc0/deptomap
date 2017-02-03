@@ -9,6 +9,7 @@ var compress = require('compression');
 var methodOverride = require('method-override');
 var ejs = require('ejs');
 var config = require('../config/config');
+var partials = require('express-partials');
 
 module.exports = (app, config) => {
   var env = process.env.NODE_ENV || 'development';
@@ -17,6 +18,7 @@ module.exports = (app, config) => {
   
   app.set('views', config.root + '/app/views');
   app.set('view engine', 'ejs');
+  app.use(partials()); /* for using layout in ejs */
 
   var controllers = glob.sync(config.root + '/app/controllers/*.js');
   controllers.forEach( (controller) => {

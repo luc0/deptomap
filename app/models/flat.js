@@ -15,7 +15,8 @@ let model = {
     rooms: Number,
     bathrooms: Number,
 		activeDays: Number,
-    isOpen: Boolean
+    isOpen: Boolean,
+    url: String
 	}
 }
 

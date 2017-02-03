@@ -1,83 +1,100 @@
-var map;
-const MAX_ACTIVE_DAYS = 180;
 
-function numberWithCommas(x) {
-    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-}
+FLATS = parseJSON( FLATS );
 
-function initMap() {
+Vue.use(VueGoogleMap, {
+  load: {
+    'key': 'AIzaSyArDyFoJj9j04gOY0DhQ77bCaU-JxKhTtA'
+  },
+  // Demonstrating how we can customize the name of the components
+  installComponents: false,
+});
 
-  map = new google.maps.Map(document.getElementById('map'), {
-	center: {
-		lat: -34.5942865, 
-		lng: -58.4301075
-	},
-	zoom: 12
-  });
+document.addEventListener('DOMContentLoaded', function() {
+    Vue.component('google-map', VueGoogleMap.Map);
+    Vue.component('info-window', VueGoogleMap.InfoWindow);
+    Vue.component('google-marker', VueGoogleMap.Marker);
+    var map = new Vue({
+        el: '#mapa',
+        data: {
+          center: {lat: -34.5942865, lng: -58.4301075},
+          markers: FLATS,
+          filterPriceMin: 5000,
+          filterPriceMax: 9000
+        },
+        methods:{
+          openInfoWindow: function( marker ){
+            this.markers.forEach( function(m){
+              m.isOpen = false;
+            });
+            marker.isOpen = true;
+          },
+          getResultsContent: function(){
+            return this.filteredMarkers.length + ' resultados.'
+          }
+        },
+        computed:{
+          filteredMarkers: function(){
+            var self = this
+            return self.markers.filter(function (marker) {
+              return (marker.price > self.filterPriceMin) && (marker.price < self.filterPriceMax) 
+            })
+          }
+        }
+    });
 
-  if( FLATS ){
-	  
-		FLATS = parseJSON( FLATS );
+    var slider = document.getElementById('slider');
 
-		var infoWindow;
-		
-	  FLATS.forEach( function( flat ){
+    noUiSlider.create(slider, {
+      start: [2000, 50000],
+      connect: true,
+      range: {
+        'min': 2000,
+        'max': 50000
+      }
+    });
 
-	  	if( flat && flat.address && flat.price && flat.lat && flat.lng && flat.m2 && flat.realState ){
-	  		
-	  		if( flat.activeDays && parseInt(flat.activeDays) > MAX_ACTIVE_DAYS ){
-	  			return;
-	  		}
+    var inputNumberMin = document.getElementById('inputFilterPriceMin');
+    var inputNumberMax = document.getElementById('inputFilterPriceMax');
 
-			  var marker = new google.maps.Marker({
-			    position: { lat: flat.lat, lng: flat.lng },
-			    map: map
-			  });
+    slider.noUiSlider.on('update', function( values, handle ) {
 
-			  var infoHTML = '<div><h2>' + flat.address + '</h2><h3>$ ' + numberWithCommas(flat.price);
-			  
-			  if( flat.includedExpenses ){
-			  	infoHTML += ' ( incluido expensas )';
-			  }
+      var value = values[handle];
 
-			  infoHTML += '</h3><strong>' + flat.realState  + '</strong><ul><li>' + flat.m2 + '</li><li>' + flat.m2total + '</li><li>' + flat.rooms + '</li><li>' + flat.bathrooms + '</li><li>' + flat.activeDays + ' días activo</li><ul></div>';
+      if ( handle ) {
+        inputNumberMax.value = value;
+        map.filterPriceMax = inputNumberMax.value;
+      } else {
+        inputNumberMin.value = Math.round(value);
+        map.filterPriceMin = inputNumberMin.value;
+      }
 
-		    marker.addListener('click', function () {
+    });
 
-		    	if (infoWindow) {
-			        infoWindow.close();
-			    }
+    inputNumberMin.addEventListener('change', function(){
+      slider.noUiSlider.set([this.value, null]);
+    });
 
-					infoWindow = new google.maps.InfoWindow({
-		        content: infoHTML
-		    	});
+    inputNumberMax.addEventListener('change', function(){
+      slider.noUiSlider.set([null, this.value]);
+    });
 
-	    		infoWindow.open(map, marker);
 
-		    });
-
-			}
-
-	  });
-
-	}
-
-}
+});
 
 function parseJSON( obj ){
-	
-	obj = obj.replace(/\\n/g, "\\n")  
-	   .replace(/\\'/g, "\\'")
-	   .replace(/\\"/g, '\\"')
-	   .replace(/\\&/g, "\\&")
-	   .replace(/\\r/g, "\\r")
-	   .replace(/\\t/g, "\\t")
-	   .replace(/\\b/g, "\\b")
-	   .replace(/\\f/g, "\\f")
-	   .replace(/\&quot;/g, '"')
-	   .replace(/\&#34;/g, '"')
-	   .replace(/[\u0000-\u0019]+/g,"");
+  
+  obj = obj.replace(/\\n/g, "\\n")  
+     .replace(/\\'/g, "\\'")
+     .replace(/\\"/g, '\\"')
+     .replace(/\\&/g, "\\&")
+     .replace(/\\r/g, "\\r")
+     .replace(/\\t/g, "\\t")
+     .replace(/\\b/g, "\\b")
+     .replace(/\\f/g, "\\f")
+     .replace(/\&quot;/g, '"')
+     .replace(/\&#34;/g, '"')
+     .replace(/[\u0000-\u0019]+/g,"");
 
-	return JSON.parse( obj );
+  return JSON.parse( obj );
 
 }

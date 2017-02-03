@@ -100,19 +100,43 @@ var hasExpenses = ( arrayPrices ) => {
 
 };
 
+var getTotalPriceFromString = function( currentPrice ){
+
+    if( !currentPrice ) return 0;
+
+    let currentInDollars = needsConvertion( currentPrice );
+    let price = getNumberFromString( currentPrice ) || 0;
+
+    if( currentInDollars ){
+      price *= DOLLARS_EXCHANGE;
+    }
+
+    console.log('>>> >>> PARSE INT',parseInt( price ));
+
+    return parseInt( price );
+
+}
+
 var createFlat = (req, res, next, flatScrapped) => {
 
-  let priceObject = getTotalPrice( flatScrapped.prices );
+  // TODO: calcular con expensas, tambien descomentar del scrapper.
+  //let priceObject = getTotalPrice( flatScrapped.prices );
+  // let price = priceObject.total;
+  // let includedExpenses = priceObject.expenses;
 
-  let price = priceObject.total;
-  let includedExpenses = priceObject.expenses;
+  let includedExpenses = false;
+  let price = getTotalPriceFromString(flatScrapped.price);
   let address = flatScrapped.address;
-  let m2 = parseInt(flatScrapped.m2);
-  let m2total = parseInt(flatScrapped.m2total);
-  let rooms = parseInt(flatScrapped.rooms);
-  let bathrooms = parseInt(flatScrapped.bathrooms);
+  let m2 = parseInt(flatScrapped.m2) || 0;
+  let m2total = parseInt(flatScrapped.m2total) || 0;
+  let rooms = parseInt(flatScrapped.rooms) || 0;
+  let bathrooms = parseInt(flatScrapped.bathrooms) || 0;
   let realState = flatScrapped.realState;
-  let activeDays = getNumberFromString( flatScrapped.activeDays );
+  let activeDays = getNumberFromString( flatScrapped.activeDays ) || 0;
+  console.log('>> m2',flatScrapped.m2);
+  console.log('>> m2total',flatScrapped.m2total);
+  console.log('>> rooms',flatScrapped.rooms);
+  console.log('>> price',price);
   
   let map = getLocationFromUrl( flatScrapped.map );
 
@@ -213,19 +237,20 @@ router.get('/scrapper', (req, res, next) => {
   
   // http://www.zonaprop.com.ar/inmuebles-alquiler-palermo.html
   // http://www.zonaprop.com.ar/departamento-alquiler-belgrano.html
+  // http://www.zonaprop.com.ar/departamento-alquiler-capital-federal.html
 
   osmosis
-  .get('http://www.zonaprop.com.ar/departamento-alquiler-belgrano.html')
+  .get('http://www.zonaprop.com.ar/departamento-alquiler-capital-federal.html')
   .follow('.pagination li:not(.pagination-action-prev):not(.pagination-action-next) a @href')
   .delay(2000)
-  .find('.list-posts')
+  .find('.list-posts .post')
   .delay(2000)
   .set({
       'title':     '.post-title > a',
-      'm2':        '.misc .misc-m2cubiertos',
-      'm2total':   '.misc .misc-m2totales',
-      'rooms':     '.misc .misc-habitaciones',
-      'bathrooms': '.misc .misc-banos'
+      // 'm2':        '.misc .misc-m2cubiertos',
+      // 'm2total':   '.misc .misc-m2totales',
+      // 'rooms':     '.misc .misc-habitaciones',
+      // 'bathrooms': '.misc .misc-banos'
   })
   .delay(2000)
   .find('.post-title a')
@@ -233,16 +258,22 @@ router.get('/scrapper', (req, res, next) => {
   .follow('@href')
   .delay(2000)
   .set({
-    'prices': [
-      osmosis
-        .find('.aviso-datos:first-child li .valor')
-        .set('price')
-    ],
+    // 'prices': [
+    //   osmosis
+    //     .find('.aviso-datos:first-child li .valor')
+    //     .set('price')
+    // ],
+    /* TODO:  VER como tomar los siguientes datos: rooms, bathroom, m2, m2total, price.  */
+    'rooms':     '.card-content span:not(.licon-ambientes)',
+    'bathrooms': '.card-content span:not(.licon-banos)',
+    'm2':        '.card-content span:not(.licon-superficie_cubierta)',
+    'm2total':   '.card-content span:not(.licon-superficie_total)',
+    'price':     '.card-content span:not(.licon-ficha_precio)',
     'address':    '.list-directions li',
     'map':        '.location .clicvermapa img @src',
     'realState':  '.datos-inmobiliaria-title',
     'activeDays': '.aviso-datos-anunciante ul li:last-child .valor',
-    'url':        ''
+    'url':        '[rel="alternate"]'
   })
   .delay(2000)
   .data(function(listing) {

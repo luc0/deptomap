@@ -17,32 +17,26 @@ module.exports = app => {
 
 var getLocationFromUrl = ( url ) => {
 
-  let POSITION_ATTRIBUTE = 'center';
+  if( !url ) return false;
   
-  if( url ){
+  let POSITION_ATTRIBUTE = 'center';
 
-    url = url.replace('?','&');
-    let urlArray = url.split('&');
-    let location;
+  url = url.replace('?','&');
+  let urlArray = url.split('&');
+  let location;
 
-    urlArray.forEach( ( chunk ) => {
+  urlArray.forEach( ( chunk ) => {
+  
+    let markers = chunk.indexOf( POSITION_ATTRIBUTE ) >= 0;
+  
+    if( !markers ) return;
     
-      let markers = chunk.indexOf( POSITION_ATTRIBUTE ) >= 0;
-    
-      if( markers ){
-        let stringLocation = chunk.replace( POSITION_ATTRIBUTE + '=','');
-        location = stringLocation.split(',');
-      }
+    let stringLocation = chunk.replace( POSITION_ATTRIBUTE + '=','');
+    location = stringLocation.split(',');
 
-    });
-    
-    return location;
-
-  }else{
-    
-    return false;
-
-  }
+  });
+  
+  return location;
 
 }
 
@@ -60,47 +54,7 @@ var getNumberFromString = ( currentString ) => {
 
 var needsConvertion = ( stringPrice ) => {
   
-  if( stringPrice.toLowerCase().indexOf('u$s') >= 0 ){
-    return true;
-  }
-  
-  return false;
-
-};
-
-var getTotalPrice = ( arrayPrices ) => {
-
-  let totalPrice = 0;
-
-  arrayPrices.forEach( ( current ) => {
-
-    let currentInDollars = needsConvertion( current.price );
-    let price = getNumberFromString( current.price ) || 0;
-
-    if( currentInDollars ){
-      price *= DOLLARS_EXCHANGE;
-    }
-
-    totalPrice += parseInt( price );
-  });
-
-  let priceObject = {};
-  priceObject.total = totalPrice;
-  priceObject.expenses = hasExpenses( arrayPrices );
-  console.log('priceObject.expenses',priceObject.expenses);
-
-  return priceObject;
-
-}
-
-var hasExpenses = ( arrayPrices ) => {
-  
-    console.log('> arrayPrices',arrayPrices);
-  if( arrayPrices.length == 3 && parseInt( getNumberFromString(arrayPrices[2].price) ) > 0 ){
-    return true; //arrayPrices[2];
-  }
-  
-  return false;
+  return ( stringPrice.toLowerCase().indexOf('u$s') >= 0 );
 
 };
 
@@ -119,94 +73,53 @@ var getTotalPriceFromString = function( currentPrice ){
 
 }
 
-var createFlat = (req, res, next, flatScrapped) => {
+var cleanData = ( flatScrapped ) => {
 
-  console.log('>> Map',flatScrapped.map);
-  console.log('>>',flatScrapped.title);
-  // TODO: calcular con expensas, tambien descomentar del scrapper.
-  //let priceObject = getTotalPrice( flatScrapped.prices );
-  // let price = priceObject.total;
-  // let includedExpenses = priceObject.expenses;
-  let priceValid = flatScrapped.price1 || flatScrapped.price2;
+  let priceValid = (flatScrapped.price1 || flatScrapped.price2),
+      includedExpenses = false,
+      price = getTotalPriceFromString(priceValid),
+      address = flatScrapped.address,
+      m2 = parseInt(flatScrapped.m2) || 0,
+      m2total = parseInt(flatScrapped.m2total) || 0,
+      rooms = parseInt(flatScrapped.rooms) || 0,
+      bathrooms = parseInt(flatScrapped.bathrooms) || 0,
+      realState = flatScrapped.realState,
+      activeDays = getNumberFromString( flatScrapped.activeDays ) || 0,
+      url = flatScrapped.url,
+      map = getLocationFromUrl( flatScrapped.map ),
+      lat = 0,
+      lng = 0,
+      position = {};
 
-  let includedExpenses = false;
-  let price = getTotalPriceFromString(priceValid);
-  let address = flatScrapped.address;
-  let m2 = parseInt(flatScrapped.m2) || 0;
-  let m2total = parseInt(flatScrapped.m2total) || 0;
-  let rooms = parseInt(flatScrapped.rooms) || 0;
-  let bathrooms = parseInt(flatScrapped.bathrooms) || 0;
-  let realState = flatScrapped.realState;
-  let activeDays = getNumberFromString( flatScrapped.activeDays ) || 0;
-  let url = flatScrapped.url;
-  // console.log('>> m2',flatScrapped.m2);
-  // console.log('>> m2total',flatScrapped.m2total);
-  // console.log('>> rooms',flatScrapped.rooms);
-  // console.log('>> price',price);
-  
-  let map = getLocationFromUrl( flatScrapped.map );
-
-  if( map && map.length == 2 ){
-
-    var lat = map[0];
-    var lng = map[1];
-
-    var position = { lat, lng };
-
-    let toSave = { price, includedExpenses, address, position, m2, m2total, rooms, bathrooms, realState, activeDays, url };
-
-    let flat = new Flat( toSave );
-
-    Flat.update( toSave, { $setOnInsert: flat }, { upsert: true }, err => {
-      if( err ) console.log('err',err);
-      //console.log('> New flat:', price, address, toSave);
-    });
-
-  }else{
-    //console.log('> Error: can not parse location from URL :(', flatScrapped);
+  if( !map && map.length != 2 ){
+    console.log('> Error: can not parse location from URL :(', flatScrapped);
+    return;
   }
+
+  lat = map[0],
+  lng = map[1];
+
+  position = { lat, lng };
+
+  return { price, includedExpenses, address, position, m2, m2total, rooms, bathrooms, realState, activeDays, url }
 
 }
 
+var createFlat = (req, res, next, flatScrapped) => {
 
-//-----------------------
-// Not used...
-//-----------------------
-var geocode = ( flat ) => {
+  // TODO: calcular con expensas, tambien descomentar del scrapper.
 
-  var req = https.get( configMaps.geocodeUrl + flat.address + '&key=' + configMaps.apiKey, function(response) {
+  let toSave = cleanData( flatScrapped );
 
-    var body = '';
-
-    var gotLocation = () => {
-      
-      body = JSON.parse( body );
-
-      if( body && body.results && body.results.length && body.results[0].geometry ){
-      
-        let location = body.results[0].geometry.location;
-
-        let lat = location.lat;
-        let lng = location.lng;
-
-      }else{
-        console.log('> Error: cant get location..');
-      }
-
-    };
+  if( !toSave ) return;
     
-    response.on('data', d => {
-        body += d;
-    });
+  let flat = new Flat( toSave );
 
-    response.on('end', gotLocation);
-
-  }).on('error', err => {
-    console.error('Error with the request:', err.message);
+  Flat.update( toSave, { $setOnInsert: flat }, { upsert: true }, err => {
+    if( err ) console.log('err',err);
   });
 
 }
-
 
 
 
@@ -221,7 +134,7 @@ router.get('/', (req, res, next) => {
   Flat.find((err, flats) => {
     if (err) return next(err);
 
-    // No es muy prolijo
+    // Could be better
     var changedFlats = [];
     flats.forEach( flat => {
       flat.isOpen = false;
@@ -238,12 +151,8 @@ router.get('/', (req, res, next) => {
 });
 
 router.get('/scrapper', (req, res, next) => {
-
-  var items = [];
   
-  // http://www.zonaprop.com.ar/inmuebles-alquiler-palermo.html
-  // http://www.zonaprop.com.ar/departamento-alquiler-belgrano.html
-  // http://www.zonaprop.com.ar/departamento-alquiler-capital-federal.html
+  var items = [];
 
   osmosis
   .get('http://www.zonaprop.com.ar/departamento-alquiler-capital-federal.html')
@@ -253,10 +162,6 @@ router.get('/scrapper', (req, res, next) => {
   .delay(2000)
   .set({
       'title':     '.post-title > a',
-      // 'm2':        '.misc .misc-m2cubiertos',
-      // 'm2total':   '.misc .misc-m2totales',
-      // 'rooms':     '.misc .misc-habitaciones',
-      // 'bathrooms': '.misc .misc-banos'
   })
   .delay(2000)
   .find('.post-title a')
@@ -264,12 +169,6 @@ router.get('/scrapper', (req, res, next) => {
   .follow('@href')
   .delay(2000)
   .set({
-    // 'prices': [
-    //   osmosis
-    //     .find('.aviso-datos:first-child li .valor')
-    //     .set('price')
-    // ],
-    /* TODO:  VER como tomar los siguientes datos: rooms, bathroom, m2, m2total, price.  */
     'rooms':     '.card-content span:has(.licon-ambientes)',
     'bathrooms': '.card-content span:has(.licon-banos)',
     'm2':        '.card-content span:has(.licon-superficie_cubierta)',
@@ -284,23 +183,10 @@ router.get('/scrapper', (req, res, next) => {
   })
   .delay(2000)
   .data(function(listing) {
-    //console.log('>listing',listing);
-    ////listing.price = listing.price.replace( /\s/, '');
     createFlat(req, res, next, listing);
   })
   .log(console.log)
   .error(console.log)
   .debug(console.log)
-
-});
-
-router.get('/createFlat', (req, res, next) => {
-  
-  let flat = {
-    price: 3500 + Math.ceil( Math.random() * 70 ) * 100,
-    address: 'Av. Libertador '+ Math.ceil( Math.random() * 6000 )
-  }
-
-  createFlat(req, res, next, flat);
 
 });

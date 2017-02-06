@@ -1,6 +1,3 @@
 # TODO
 
-* Save fields only numbers or string, not escaped strings.
-* Scrap different locations
-* Scrap images
-* Add filters with vue.js
+* BUG: It's scrapping 20 times the same item.

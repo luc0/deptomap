@@ -14,19 +14,23 @@ module.exports = app => {
   app.use('/', router);
 };
 
+
 var getLocationFromUrl = ( url ) => {
+
+  let POSITION_ATTRIBUTE = 'center';
   
   if( url ){
 
+    url = url.replace('?','&');
     let urlArray = url.split('&');
     let location;
 
     urlArray.forEach( ( chunk ) => {
     
-      let markers = chunk.indexOf('markers') >= 0;
+      let markers = chunk.indexOf( POSITION_ATTRIBUTE ) >= 0;
     
       if( markers ){
-        let stringLocation = chunk.replace('markers=','');
+        let stringLocation = chunk.replace( POSITION_ATTRIBUTE + '=','');
         location = stringLocation.split(',');
       }
 
@@ -111,21 +115,22 @@ var getTotalPriceFromString = function( currentPrice ){
       price *= DOLLARS_EXCHANGE;
     }
 
-    console.log('>>> >>> PARSE INT',parseInt( price ));
-
     return parseInt( price );
 
 }
 
 var createFlat = (req, res, next, flatScrapped) => {
 
+  console.log('>> Map',flatScrapped.map);
+  console.log('>>',flatScrapped.title);
   // TODO: calcular con expensas, tambien descomentar del scrapper.
   //let priceObject = getTotalPrice( flatScrapped.prices );
   // let price = priceObject.total;
   // let includedExpenses = priceObject.expenses;
+  let priceValid = flatScrapped.price1 || flatScrapped.price2;
 
   let includedExpenses = false;
-  let price = getTotalPriceFromString(flatScrapped.price);
+  let price = getTotalPriceFromString(priceValid);
   let address = flatScrapped.address;
   let m2 = parseInt(flatScrapped.m2) || 0;
   let m2total = parseInt(flatScrapped.m2total) || 0;
@@ -133,10 +138,11 @@ var createFlat = (req, res, next, flatScrapped) => {
   let bathrooms = parseInt(flatScrapped.bathrooms) || 0;
   let realState = flatScrapped.realState;
   let activeDays = getNumberFromString( flatScrapped.activeDays ) || 0;
-  console.log('>> m2',flatScrapped.m2);
-  console.log('>> m2total',flatScrapped.m2total);
-  console.log('>> rooms',flatScrapped.rooms);
-  console.log('>> price',price);
+  let url = flatScrapped.url;
+  // console.log('>> m2',flatScrapped.m2);
+  // console.log('>> m2total',flatScrapped.m2total);
+  // console.log('>> rooms',flatScrapped.rooms);
+  // console.log('>> price',price);
   
   let map = getLocationFromUrl( flatScrapped.map );
 
@@ -147,17 +153,17 @@ var createFlat = (req, res, next, flatScrapped) => {
 
     var position = { lat, lng };
 
-    let toSave = { price, includedExpenses, address, position, m2, m2total, rooms, bathrooms, realState, activeDays };
+    let toSave = { price, includedExpenses, address, position, m2, m2total, rooms, bathrooms, realState, activeDays, url };
 
     let flat = new Flat( toSave );
 
     Flat.update( toSave, { $setOnInsert: flat }, { upsert: true }, err => {
       if( err ) console.log('err',err);
-      console.log('> New flat:', price, address, toSave);
+      //console.log('> New flat:', price, address, toSave);
     });
 
   }else{
-    console.log('> Error: can not parse location from URL :(', flatScrapped);
+    //console.log('> Error: can not parse location from URL :(', flatScrapped);
   }
 
 }
@@ -264,16 +270,17 @@ router.get('/scrapper', (req, res, next) => {
     //     .set('price')
     // ],
     /* TODO:  VER como tomar los siguientes datos: rooms, bathroom, m2, m2total, price.  */
-    'rooms':     '.card-content span:not(.licon-ambientes)',
-    'bathrooms': '.card-content span:not(.licon-banos)',
-    'm2':        '.card-content span:not(.licon-superficie_cubierta)',
-    'm2total':   '.card-content span:not(.licon-superficie_total)',
-    'price':     '.card-content span:not(.licon-ficha_precio)',
+    'rooms':     '.card-content span:has(.licon-ambientes)',
+    'bathrooms': '.card-content span:has(.licon-banos)',
+    'm2':        '.card-content span:has(.licon-superficie_cubierta)',
+    'm2total':   '.card-content span:has(.licon-superficie_total)',
+    'price1':     '.h2.precios strong',
+    'price2':     '.h2.precios span.valor',
     'address':    '.list-directions li',
     'map':        '.location .clicvermapa img @src',
     'realState':  '.datos-inmobiliaria-title',
     'activeDays': '.aviso-datos-anunciante ul li:last-child .valor',
-    'url':        '[rel="alternate"]'
+    'url':        'meta[property="og:url"] @content'
   })
   .delay(2000)
   .data(function(listing) {
